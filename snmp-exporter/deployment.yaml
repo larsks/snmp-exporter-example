@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snmp-exporter
+spec:
+  replicas: 1
+  template:
+    spec:
+      initContainers:
+        - name: fetch-config
+          image: docker.io/alpine/curl:latest
+          volumeMounts:
+            - name: generator-scripts
+              mountPath: /scripts
+            - name: generator-config
+              mountPath: /config
+          command:
+            - sh
+            - /scripts/fetch-snmp-exporter-config.sh
+      containers:
+        - name: snmp-exporter
+          image: docker.io/prom/snmp-exporter:v0.28.0
+          ports:
+            - containerPort: 9116
+          command:
+            - snmp_exporter
+          args:
+            - --config.file=/config/snmp.yml
+          volumeMounts:
+            - name: generator-config
+              mountPath: /config
+      volumes:
+        - name: generator-scripts
+          configMap:
+            name: generator-scripts
+        - name: generator-config
+          persistentVolumeClaim:
+            claimName: generator-config

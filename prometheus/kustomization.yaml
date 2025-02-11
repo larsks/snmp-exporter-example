@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+commonLabels:
+  component: prometheus
+
+configMapGenerator:
+  - name: prometheus-config
+    files:
+      - data/prometheus.yml
+
+resources:
+  - deployment.yaml
+  - service.yaml
+  - persistentvolumeclaims/prometheus-data.yaml
