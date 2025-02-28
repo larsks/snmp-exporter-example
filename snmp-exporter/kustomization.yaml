@@ -6,10 +6,9 @@ commonLabels:
 
 resources:
   - deployment.yaml
-  - persistentvolumeclaims/generator-config.yaml
   - service.yaml
 
 configMapGenerator:
-  - name: generator-scripts
+  - name: generator-config
     files:
-      - scripts/fetch-snmp-exporter-config.sh
+      - files/generator.yaml

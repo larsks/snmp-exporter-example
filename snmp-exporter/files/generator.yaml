@@ -1,0 +1,38 @@
+auths:
+  public_v1:
+    version: 1
+  public_v2:
+    version: 2
+modules:
+  networking:
+    walk:
+      - interfaces
+      - ifXTable
+      - ipv4InterfaceTable
+    lookups:
+      - source_indexes:
+          - ifIndex
+        lookup: ifAlias
+      - source_indexes:
+          - ifIndex
+        lookup: ifDescr
+      - source_indexes:
+          - ifIndex
+        lookup: ifName
+    overrides:
+      ifAlias:
+        ignore: true
+      ifDescr:
+        ignore: true
+      ifName:
+        ignore: true
+      ifType:
+        type: EnumAsInfo
+  system:
+    walk:
+      - sysUpTime
+      - SNMPv2-MIB::system
+    overrides:
+      sysName:
+        ignore: false
+        type: DisplayString

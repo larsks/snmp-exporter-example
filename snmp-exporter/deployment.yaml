@@ -7,32 +7,34 @@ spec:
   template:
     spec:
       initContainers:
-        - name: fetch-config
-          image: docker.io/alpine/curl:latest
+        - name: generate-config
+          image: ghcr.io/ocp-on-nerc/snmp-config-generator:latest
+          imagePullPolicy: Always
           volumeMounts:
-            - name: generator-scripts
-              mountPath: /scripts
-            - name: generator-config
+            - name: src-config
               mountPath: /config
-          command:
-            - sh
-            - /scripts/fetch-snmp-exporter-config.sh
+            - name: dst-config
+              mountPath: /output
+          args:
+            - generate
+            - --mibs-dir=/mibs
+            - --generator-path=/config/generator.yaml
+            - --output-path=/output/snmp.yaml
       containers:
         - name: snmp-exporter
-          image: docker.io/prom/snmp-exporter:v0.28.0
+          image: quay.io/prometheus/snmp-exporter:v0.28.0
           ports:
             - containerPort: 9116
           command:
             - snmp_exporter
           args:
-            - --config.file=/config/snmp.yml
+            - --config.file=/config/snmp.yaml
           volumeMounts:
-            - name: generator-config
+            - name: dst-config
               mountPath: /config
       volumes:
-        - name: generator-scripts
+        - name: src-config
           configMap:
-            name: generator-scripts
-        - name: generator-config
-          persistentVolumeClaim:
-            claimName: generator-config
+            name: generator-config
+        - name: dst-config
+          emptyDir: {}
